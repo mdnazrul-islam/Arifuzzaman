@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - পোস্ট ম্যানেজার</title>
+
+  <!-- Firebase (v8 compat CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="style1.css" type="text/css" media="all" />
+</head>
+<body class="locked">
+  <div id="protecteArea">
+    
+  
+  <h2>Admin —</h2>
+
+  <div class="card">
+    <label>টাইটেল</label><br/>
+    <select id="folderSelect">
+  <option value="product">Product</option>
+  <option value="recent">Recent</option>
+  <option value="about">About</option>
+</select>
+    <input id="title" type="text"  placeholder="Post Title"><br/><br/>
+
+    <label></label><br/>
+    <textarea id="details" rows="4" placeholder="Post Details"></textarea><br/><br/>
+
+    <label>Photo</label><br/>
+    <input id="photo" type="file" accept="image/*"><br/><br/>
+
+    <div class="progress" >
+      <div id="progressBar"></div>
+    </div>
+
+    <button id="postBtn" class="btn btn-primary">Post</button>
+  </div>
+
+  <h2>Services We Offer</h2>
+  <h3>Products</h3>
+  <div id="product">
+    লোড হচ্ছে...</div>
+    <h3>Our recent work</h3>
+  <div id="recent">
+    loading,,,
+  </div>
+  <h3>About me</h3>
+  <div id="about">
+    loading,,,
+  </div>
+  
+  <!-- Select Options Manager -->
+<div class="card">
+  <h3>Project Category</h3>
+  <input id="newOption" type="text" placeholder="Add Category">
+  <button class="btnAdd" id="addOption">Add➕</button>
+
+  <h4>Projects</h4>
+  <div id="optionsList"></div>
+</div>
+
+<!-- User Form Data -->
+<div class="card">
+  <h3>Client Submitted Data</h3>
+  <div id="userData">লোড হচ্ছে...</div>
+</div>
+</div>
+  <script>
+    // ========== CONFIG ==========
+    const PASSWORD = 'ArifuzzamaN'; // <-- এটাকে নিজের পাসওয়ার্ড দিয়ে বদলান
+    const ALLOW_REMEMBER = false; // true হলে localStorage-এ একবার লগইন করলে পর পর পাসওয়ার্ড চাইবে না
+
+    // ========== BOOTSTRAP ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      // যদি user আগেই আনলক করে থাকে এবং ALLOW_REMEMBER true হলে সরাসরি দেখাবে
+      const unlocked = ALLOW_REMEMBER && localStorage.getItem('admin_unlocked') === '1';
+
+      if (unlocked) {
+        unlockUI();
+        return;
+      }
+
+      askPassword();
+    });
+
+    function askPassword() {
+      Swal.fire({
+        title: 'পাসওয়ার্ড প্রয়োজন',
+        input: 'password',
+        inputPlaceholder: 'পাসওয়ার্ড লিখুন',
+        showCancelButton: true,
+        confirmButtonText: 'লগইন',
+        cancelButtonText: 'বাতিল',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        preConfirm: (value) => {
+          if (!value) {
+            Swal.showValidationMessage('পাসওয়ার্ড দিন');
+            return false;
+          }
+          return value;
+        }
+      }).then((res) => {
+        if (res.isConfirmed) {
+          const val = res.value;
+          if (val === PASSWORD) {
+            if (ALLOW_REMEMBER) localStorage.setItem('admin_unlocked', '1');
+            unlockUI();
+            Swal.fire('সফল', 'অ্যাক্সেস অনুমোদিত', 'success');
+          } else {
+            Swal.fire({
+              title: 'ত্রুটি',
+              text: 'পাসওয়ার্ড ভুল — আবার চেষ্টা করুন',
+              icon: 'error',
+              confirmButtonText: 'আবার চেষ্টা'
+            }).then(() => {
+              askPassword(); // পুনরায় জিজ্ঞাসা
+            });
+          }
+        } else {
+          // বাতিল করলে পেজ লোড না করে একটি বন্ধ বার্তা দেখান
+          document.body.innerHTML = `
+            <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;">
+              <h2 style="color:#111827;margin-bottom:10px;">Access Denied</h2>
+              <p style="color:#6b7280;">পাসওয়ার্ড না দিলে পেজ লোড হবে না।</p>
+            </div>
+          `;
+        }
+      });
+    }
+
+    function unlockUI() {
+      // protected area দেখান
+      const wrap = document.getElementById('protectedArea');
+      if (wrap) {
+        wrap.style.display = ''; // default:block
+      }
+      // খুলে দেয়া হলে class 'locked' মুছে দিন (optional)
+      document.body.classList.remove('locked');
+    }
+
+    // Optional: লগআউট করার জন্য একটি ফাংশন তৈরি (console এ call করলে কাজ করবে)
+    function adminLogout() {
+      localStorage.removeItem('admin_unlocked');
+      location.reload();
+    }
+    // আপনি চাইলে adminLogout() কে কোনো বাটনে যুক্ত করতে পারেন
+  </script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAOwQgpC4ebDiRpogM3AJMJBmjshS8DzNA",
+    authDomain: "nazrul-islam1.firebaseapp.com",
+    databaseURL: "https://nazrul-islam1-default-rtdb.firebaseio.com",
+    projectId: "nazrul-islam1",
+    storageBucket: "nazrul-islam1.appspot.com",
+    messagingSenderId: "84306575668",
+    appId: "1:84306575668:web:a35617eda51ec990932561"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const storage = firebase.storage();
+
+  const titleInput = document.getElementById('title');
+  const detailsInput = document.getElementById('details');
+  const photoInput = document.getElementById('photo');
+  const postBtn = document.getElementById('postBtn');
+  const progressWrap = document.querySelector('.progress');
+  const progressBar = document.getElementById('progressBar');
+
+  const folderSelect = document.getElementById('folderSelect');  // <-- নতুন
+
+  postBtn.addEventListener('click', async () => {
+    const title = titleInput.value.trim();
+    const details = detailsInput.value.trim();
+    const file = photoInput.files[0];
+    const folder = folderSelect.value;    // <-- কোন ফোল্ডারে পোস্ট যাবে
+
+    if (!title) return Swal.fire('ত্রুটি', 'টাইটেল দিতে হবে', 'error');
+    if (!details) return Swal.fire('ত্রুটি', 'বিস্তারিত দিতে হবে', 'error');
+    if (!file) return Swal.fire('ত্রুটি', 'একটি ছবি দিন', 'error');
+
+    postBtn.disabled = true;
+    progressWrap.style.display = 'block';
+    progressBar.style.width = '0%';
+
+    try {
+      // --- এখানে ডাইনামিক path ---
+      const newRef = db.ref(folder).push();
+      const postId = newRef.key;
+
+      const ext = file.name.split('.').pop();
+      const storagePath = `${folder}/${postId}.${ext}`;
+      const storageRef = storage.ref().child(storagePath);
+
+      const uploadTask = storageRef.put(file);
+
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          progressBar.style.width = percent + '%';
+        },
+        (err) => {
+          Swal.fire('আপলোড ব্যর্থ', err.message, 'error');
+          postBtn.disabled = false;
+          progressWrap.style.display = 'none';
+        },
+        async () => {
+          const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+
+          await newRef.set({
+            title,
+            details,
+            imageUrl: downloadURL,
+            imagePath: storagePath,
+            ts: Date.now()
+          });
+
+          Swal.fire('সফল', 'পোস্ট করা হয়েছে', 'success');
+
+          titleInput.value = '';
+          detailsInput.value = '';
+          photoInput.value = '';
+          progressWrap.style.display = 'none';
+          postBtn.disabled = false;
+        }
+      );
+
+    } catch (e) {
+      Swal.fire('ত্রুটি', e.message, 'error');
+      postBtn.disabled = false;
+      progressWrap.style.display = 'none';
+    }
+  });
+</script>
+  <script type="text/javascript" charset="utf-8">
+
+  function loadPosts(path, containerId) {
+    const container = document.getElementById(containerId);
+
+    db.ref(path).on('value', snapshot => {
+        const val = snapshot.val() || {};
+        const items = [];
+
+        for (let k in val) items.push({ id: k, ...val[k] });
+
+        // newest first
+        items.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+        if (items.length === 0) {
+            container.innerHTML = '<div>কোনো পোস্ট নেই</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+
+        items.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'post';
+
+            div.innerHTML = `
+                <img src="${escapeHtml(p.imageUrl || '')}" alt="${escapeHtml(p.title || '')}">
+                <div class="title">${escapeHtml(p.title || '')}</div>
+                <div class="details">${escapeHtml(p.details || '')}</div>
+
+                <button class="deleteBtn" onclick="deletePost('${path}', '${p.id}')">
+                    Delete
+                </button>
+            `;
+
+            container.appendChild(div);
+        });
+    });
+  }
+
+
+  // পোস্ট ডিলিট ফাংশন
+  function deletePost(path, id) {
+      Swal.fire({
+          title: "Are you sure?",
+          text: "এই পোস্টটি ডিলিট হয়ে যাবে!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, Delete",
+          cancelButtonText: "Cancel"
+      }).then((result) => {
+
+          if (result.isConfirmed) {
+              db.ref(path + "/" + id).remove()
+              .then(() => {
+                  Swal.fire("Deleted!", "পোস্ট ডিলিট করা হয়েছে।", "success");
+              })
+              .catch((err) => {
+                  Swal.fire("Error!", "কিছু সমস্যা হয়েছে!", "error");
+              });
+          }
+      });
+  }
+
+
+  // নিরাপত্তার জন্য escape function
+  function escapeHtml(text) {
+      if (!text) return "";
+      return text.replace(/[\"&'\/<>]/g, function (a) {
+          return {
+              '"': '&quot;',
+              '&': '&amp;',
+              "'": '&#39;',
+              '/': '&#47;',
+              '<': '&lt;',
+              '>': '&gt;'
+          }[a];
+      });
+  }
+
+  loadPosts('product', 'product');
+  loadPosts('recent', 'recent');
+  loadPosts('about', 'about');
+
+</script>
+<script type="text/javascript" charset="utf-8">
+  // Add Option
+document.getElementById("addOption").onclick = async ()=>{
+  const name = document.getElementById("newOption").value.trim();
+  if(!name) return Swal.fire("ত্রুটি", "অপশনের নাম দিন", "error");
+
+  const ref = db.ref("selectOptions").push();
+  await ref.set(name);
+
+  Swal.fire("সফল", "অপশন যোগ হয়েছে", "success");
+  document.getElementById("newOption").value = "";
+};
+
+
+// Load options list
+db.ref("selectOptions").on("value", snap=>{
+  const data = snap.val() || {};
+  const wrap = document.getElementById("optionsList");
+  wrap.innerHTML = "";
+
+  for (let id in data){
+    const div = document.createElement("div");
+    div.className = "listDiv";
+    div.innerHTML = `
+      ${data[id]}
+      <button class="btnDel" onclick="removeOpt('${id}')">X</button>
+    `;
+    wrap.appendChild(div);
+  }
+});
+
+function removeOpt(id){
+  Swal.fire({
+    title:"Confirm Delete?",
+    icon:"warning",
+    showCancelButton:true,
+    confirmButtonText:"Delete"
+  }).then(res=>{
+    if(res.isConfirmed){
+      db.ref("selectOptions/"+id).remove();
+      Swal.fire("মুছে ফেলা হয়েছে","","success");
+    }
+  });
+}
+
+
+// Load user submissions
+
+</script>
+
+
+<script>
+db.ref("userForms").on("value", snap => {
+  const val = snap.val() || {};
+  const keys = Object.keys(val).sort((a, b) => val[b].ts - val[a].ts); // নতুন ডেটা উপরে
+
+  const wrap = document.getElementById("userData");
+  wrap.innerHTML = ""; // আগে থাকা ডেটা মুছে দাও
+
+  // Table তৈরি
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.style.borderCollapse = "collapse";
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th style="border: 1px solid #000;">#</th>
+        <th style="border: 1px solid #000;">Select</th>
+        <th style="border: 1px solid #000;">Name</th>
+        <th style="border: 1px solid #000;">Email</th>
+        <th style="border: 1px solid #000;">Details</th>
+        <th style="border: 1px solid #000;">Time</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+  const tbody = table.querySelector("tbody");
+
+  keys.forEach((id, index) => {
+    const item = val[id];
+    const tr = document.createElement("tr");
+
+    // Timestamp কে readable date এ রূপান্তর
+    const time = new Date(item.ts).toLocaleString();
+
+    tr.innerHTML = `
+      <td style="border: 1px solid #000; text-align:center;">${index + 1}</td>
+      <td style="border: 1px solid #000;">${item.select}</td>
+      <td style="border: 1px solid #000;">${item.name}</td>
+      <td style="border: 1px solid #000;">${item.email}</td>
+      <td style="border: 1px solid #000;">${item.details}</td>
+      <td style="border: 1px solid #000;">${time}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  wrap.appendChild(table);
+});
+</script>
+  <script type="text/javascript" charset="utf-8">
+    db.ref("selectOptions").on("value", snap=>{
+  const opts = snap.val() || {};
+  const select = document.getElementById("selectBox");
+  select.innerHTML = "";
+  for (let key in opts){
+    const op = document.createElement("option");
+    op.value = opts[key];
+    op.textContent = opts[key];
+    select.appendChild(op);
+  }
+});
+
+// Submit form
+document.getElementById("submitBtn").onclick = async ()=>{
+  const selectVal = document.getElementById("selectBox").value;
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const details = document.getElementById("details").value.trim();
+
+  if(!selectVal || !name || !email || !details){
+    return Swal.fire("ত্রুটি", "সব ঘর পূরণ করুন", "error");
+  }
+
+  try{
+    await db.ref("userForms").push({
+      select: selectVal,
+      name, email, details,
+      ts: Date.now()
+    });
+
+    Swal.fire("সফল", "ফর্ম সাবমিট হয়েছে", "success");
+
+    document.getElementById("name").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("details").value = "";
+
+  } catch(e){
+    Swal.fire("ত্রুটি", e.message, "error");
+  }
+};
+  </script>
+ 
+</body>
+                                                                                 </html>
