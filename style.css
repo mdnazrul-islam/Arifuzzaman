@@ -555,3 +555,12 @@ input::placeholder, textarea::placeholder{
 @media (prefers-reduced-motion: reduce){
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
     }
+
+@media (min-width: 992px) {
+  .post img{
+    height: 370px;
+  }
+  #overlayMenu{ 
+    display: none;
+  }
+}
