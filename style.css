@@ -556,7 +556,7 @@ input::placeholder, textarea::placeholder{
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
     }
 
-@media (min-width: 992px) {
+@media (min-width: 592px) {
   .post img{
     height: 370px;
   }
