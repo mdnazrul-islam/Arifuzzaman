@@ -13,6 +13,275 @@
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="style1.css" type="text/css" media="all" />
+  <style>/* -------------------- Google Font -------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+body{
+    background:#f2f4f8;
+    padding:20px;
+    
+}
+
+/* -------------------- Navbar -------------------- */
+.navbar{
+    width:100%;
+    background:#111827;
+    color:#fff;
+    padding:15px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-radius:10px;
+}
+
+.navbar .logo{
+    font-size:20px;
+    font-weight:600;
+    color:#fff;
+    text-decoration:none;
+}
+
+.navbar ul{
+    list-style:none;
+    display:flex;
+    gap:20px;
+}
+
+.navbar ul li a{
+    color:#fff;
+    text-decoration:none;
+    font-weight:400;
+    transition:0.3s;
+}
+
+.navbar ul li a:hover{
+    color:#3b82f6;
+}
+
+.hamburger{
+    display:none;
+}
+
+/* -------------------- Headings -------------------- */
+h2{
+    margin:20px 0 10px 0;
+    color:#111827;
+    font-size:22px;
+    font-weight:600;
+}
+
+/* -------------------- Card Box -------------------- */
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    margin-bottom:25px;
+    transition:0.3s;
+}
+
+.card:hover{
+    box-shadow:0 8px 18px rgba(0,0,0,0.12);
+}
+
+/* -------------------- Inputs -------------------- */
+.card input,
+textarea,
+select{
+    width:100%;
+    padding:10px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    margin-top:8px;
+    font-size:14px;
+    outline:none;
+    transition:0.2s;
+}
+
+.card input:focus,
+textarea:focus,
+select:focus{
+    border-color:#3b82f6;
+}
+
+/* -------------------- Buttons -------------------- */
+.btn,
+.btn-primary{
+    width:100%;
+    padding:12px;
+    background:#3b82f6;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn:hover,
+.btn-primary:hover{
+    background:#2563eb;
+}
+
+.btnAdd{
+    padding:10px 15px;
+    background:#111827;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.btnAdd:hover{
+    background:#3b82f6;
+}
+
+.btnDel{
+    padding:5px 10px;
+    background:#ef4444;
+    color:#fff;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.btnDel:hover{
+    background:#dc2626;
+}
+
+/* -------------------- Progress Bar -------------------- */
+.progress{
+    width:100%;
+    height:10px;
+    background:#e5e7eb;
+    border-radius:6px;
+    margin:15px 0;
+    display:none;
+}
+
+#progressBar{
+    height:100%;
+    width:0%;
+    background:#10b981;
+    border-radius:6px;
+    transition:0.3s;
+}
+
+/* -------------------- Post Show Box -------------------- */
+.post{
+    background:#fff;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    margin-bottom:20px;
+}
+
+.post img{
+    width:100%;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.post .title{
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:5px;
+}
+
+.post .details{
+    font-size:14px;
+    margin-bottom:12px;
+}
+
+/* Delete Button */
+.post .deleteBtn{
+    padding:10px;
+    background:#ef4444;
+    color:#fff;
+    width:100%;
+    border:none;
+    border-radius:8px;
+}
+
+.post .deleteBtn:hover{
+    background:#dc2626;
+}
+
+/* -------------------- List Div -------------------- */
+.listDiv{
+    background:#f9fafb;
+    padding:12px;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    margin:8px 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+/* -------------------- Responsive -------------------- */
+@media (max-width:768px){
+    .navbar ul{
+        display:none;
+    }
+    .hamburger{
+        display:block;
+    }
+}
+/* Table Responsive Fix */
+#userData {
+    width: 100%;
+    overflow-x: auto;    /* পাশ দিয়ে স্ক্রল হবে */
+}
+
+#userData table {
+    min-width: 700px;     /* টেবিলে জায়গা টাইট হলে ভেঙে যাবে না */
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+#userData th, 
+#userData td {
+    padding: 8px;
+    font-size: 14px;
+    white-space: nowrap;  /* টেক্সট ব্রেক হবে না */
+}
+/* ======= Protected area visual helpers ======= */
+body.locked {
+  /* page content hidden by default; protectedArea has inline style display:none,
+     কেবল extra safety হিসেবে body.locked দিয়ে কিছু স্টাইল দেয়া হল */
+  background: #f8fafc;
+}
+
+#protectedArea {
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+/* আপনি চাইলে protectedArea দেখার পর হাল্কা animation যোগ করতে পারেন */
+#protectedArea[style*="display:"] {
+  /* no-op */
+}
+
+/* যদি আপনি overlay spinner/blur চান তখন নিচের স্টাইল ব্যবহার করতে পারেন */
+.locked-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}</style>
 </head>
 <body class="locked">
   <div id="protecteArea">
